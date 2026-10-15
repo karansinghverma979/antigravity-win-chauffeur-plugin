@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "win-chauffeur": {
+      "command": "python",
+      "args": [
+        "mcp/server.py"
+      ],
+      "disabled": false
+    }
+  }
+}

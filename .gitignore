@@ -1,0 +1,32 @@
+# .NET Build Output & Caches
+**/bin/Debug/
+**/bin/Release/
+**/obj/
+*.pdb
+*.user
+*.userosscache
+*.sln.docstates
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+.venv
+env/
+venv/
+
+# Temporary & Scratch Buffers
+*.tmp
+*.log
+/scratch/
+temp_*.png
+temp_*.jpg
+
+# OS & Editor
+Thumbs.db
+Desktop.ini
+.DS_Store
+.vscode/
+.idea/
