@@ -62,11 +62,15 @@ public static class Win32
     public const byte VK_LWIN = 0x5B;
     public const byte VK_RWIN = 0x5C;
     public const byte VK_F11 = 0x7A;
+    public const byte VK_VOLUME_MUTE = 0xAD;
+    public const byte VK_VOLUME_DOWN = 0xAE;
+    public const byte VK_VOLUME_UP = 0xAF;
 
-    // Messages
+    // Messages & Attributes
     public const uint WM_CLOSE = 0x0010;
     public const uint SPI_GETWORKAREA = 0x0030;
     public const uint MONITOR_DEFAULTTONEAREST = 2;
+    public const uint DWMWA_EXTENDED_FRAME_BOUNDS = 9;
 
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT
@@ -167,4 +171,7 @@ public static class Win32
 
     [DllImport("user32.dll", SetLastError = true)]
     public static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("dwmapi.dll")]
+    public static extern int DwmGetWindowAttribute(IntPtr hwnd, uint dwAttribute, out RECT pvAttribute, int cbAttribute);
 }

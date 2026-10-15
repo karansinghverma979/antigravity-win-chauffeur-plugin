@@ -71,37 +71,46 @@ Attempting to open photos, view PDFs, or launch browsers from that background su
 
 ### 1. Direct CLI Tool (`bin/win-chauffeur.exe`)
 ```powershell
-# Screen Perception (instant capture)
+# Screen Perception (instant capture without shadow padding)
 win-chauffeur look "desktop.png"
 win-chauffeur look "window.png" --window "WindowsTerminal"
 
-# Window Management (tiling, snapping, focus)
+# Window Management (tiling, snapping, focus, close)
 win-chauffeur window list
 win-chauffeur window tile "WindowsTerminal" left_half
 win-chauffeur window tile "msedge" right_half
 win-chauffeur window focus "WindowsTerminal"
 win-chauffeur window close "Notepad"
 
-# Desktop & Displays
-win-chauffeur desktop list
-win-chauffeur desktop move "WindowsTerminal" 0
+# 1-Click Workspace Profiles (Instant developer staging)
+win-chauffeur layout coding     # Terminal left 50%, Browser top-right, Editor bottom-right
+win-chauffeur layout research   # Browser left 50%, Notes/Obsidian right 50%
+win-chauffeur layout focus      # Active window centered at 75% work area
 
-# Universal Launcher (Zero-Ghost Out-of-Process dispatch)
+# Named Virtual Desktops (Zero blind-key guessing)
+win-chauffeur desktop list               # Lists physical displays & named virtual desktops
+win-chauffeur desktop goto "Obsidian"    # Teleport directly to Obsidian workspace
+win-chauffeur desktop goto "Terminal"    # Teleport back to active Terminal workspace
+
+# Media & Volume Sentinel (Playback & Sound controls)
+win-chauffeur media status               # Enumerate active audio/video streams
+win-chauffeur media play                 # Resume media playback
+win-chauffeur media pause                # Pause background media
+win-chauffeur media mute                 # Mute system master volume
+win-chauffeur media volup / voldown      # Increment/decrement audio volume
+
+# Universal Launcher (Zero-Ghost Out-of-Process dispatch via Explorer COM)
 win-chauffeur open "C:\assets\photo.jpg"
 win-chauffeur open "https://github.com"
-
-# Browser & Media Controller
-win-chauffeur browser list
-win-chauffeur browser media-toggle
-win-chauffeur browser close-tab "YouTube"
 ```
 
 ### 2. Antigravity MCP Server (`--mcp`)
 Registered in [`mcp_config.json`](mcp_config.json) for autonomous agent execution:
-* `win_chauffeur_look`: Captures screen or specific window bounding box.
-* `win_chauffeur_window`: 1-shot window tiling, layout presets, focus, and close.
-* `win_chauffeur_desktop`: Multi-display enumeration and window monitor migration.
+* `win_chauffeur_look`: Captures screen or specific window bounding box without drop-shadow waste.
+* `win_chauffeur_window`: 1-shot window tiling, layout presets, workspace profiles (`coding`, `research`, `focus`), focus, and close.
+* `win_chauffeur_desktop`: Multi-display enumeration, virtual desktop discovery, and named teleportation (`goto`).
 * `win_chauffeur_browser`: Tab enumeration, tab closure, and hardware media play/pause.
+* `win_chauffeur_media`: Global system media status, playback control, and master volume regulation.
 * `win_chauffeur_open`: Universal Out-of-Process Explorer dispatch with ghost mitigation.
 * `win_chauffeur_interact`: Precision click coordinates and key sequences.
 

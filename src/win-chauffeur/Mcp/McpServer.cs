@@ -142,9 +142,10 @@ public static class McpServer
                     ["type"] = "object",
                     ["properties"] = new JsonObject
                     {
-                        ["action"] = new JsonObject { ["type"] = "string", ["enum"] = new JsonArray { "list", "tile", "focus", "close" }, ["description"] = "Action to execute." },
+                        ["action"] = new JsonObject { ["type"] = "string", ["enum"] = new JsonArray { "list", "tile", "focus", "close", "profile" }, ["description"] = "Action to execute." },
                         ["target"] = new JsonObject { ["type"] = "string", ["description"] = "Window title or process name to match." },
                         ["layout"] = new JsonObject { ["type"] = "string", ["enum"] = new JsonArray { "left_half", "right_half", "top_left", "top_right", "bottom_left", "bottom_right", "center", "maximize", "minimize", "restore", "topmost", "untopmost" }, ["description"] = "Layout preset." },
+                        ["profile"] = new JsonObject { ["type"] = "string", ["enum"] = new JsonArray { "coding", "research", "focus", "split" }, ["description"] = "Workspace profile to apply." },
                         ["force"] = new JsonObject { ["type"] = "boolean", ["description"] = "Force terminate process on close." }
                     },
                     ["required"] = new JsonArray { "action" }
@@ -153,14 +154,15 @@ public static class McpServer
             new JsonObject
             {
                 ["name"] = "win_chauffeur_desktop",
-                ["description"] = "Multi-display discovery and window migration across monitors.",
+                ["description"] = "Multi-display discovery, virtual desktop enumeration, and named virtual desktop teleportation.",
                 ["inputSchema"] = new JsonObject
                 {
                     ["type"] = "object",
                     ["properties"] = new JsonObject
                     {
-                        ["action"] = new JsonObject { ["type"] = "string", ["enum"] = new JsonArray { "list_displays", "move_to_monitor" } },
-                        ["target"] = new JsonObject { ["type"] = "string", ["description"] = "Window title or process to move." },
+                        ["action"] = new JsonObject { ["type"] = "string", ["enum"] = new JsonArray { "list_displays", "list_desktops", "goto", "move_to_monitor", "switch" } },
+                        ["target"] = new JsonObject { ["type"] = "string", ["description"] = "Target virtual desktop name/index, or window to move." },
+                        ["direction"] = new JsonObject { ["type"] = "string", ["enum"] = new JsonArray { "left", "right" }, ["description"] = "Switch direction." },
                         ["monitor_index"] = new JsonObject { ["type"] = "integer", ["description"] = "Index of target monitor (0, 1...)." }
                     },
                     ["required"] = new JsonArray { "action" }
@@ -210,6 +212,20 @@ public static class McpServer
                         ["y"] = new JsonObject { ["type"] = "integer", ["description"] = "Click Y coordinate." },
                         ["button"] = new JsonObject { ["type"] = "string", ["enum"] = new JsonArray { "left", "right" } },
                         ["keys"] = new JsonObject { ["type"] = "array", ["items"] = new JsonObject { ["type"] = "string" }, ["description"] = "Key sequence to press (e.g. ['ctrl', 'w'])." }
+                    },
+                    ["required"] = new JsonArray { "action" }
+                }
+            },
+            new JsonObject
+            {
+                ["name"] = "win_chauffeur_media",
+                ["description"] = "Controls media playback, track navigation, and volume levels on Motobook workstation.",
+                ["inputSchema"] = new JsonObject
+                {
+                    ["type"] = "object",
+                    ["properties"] = new JsonObject
+                    {
+                        ["action"] = new JsonObject { ["type"] = "string", ["enum"] = new JsonArray { "status", "play", "pause", "toggle", "next", "prev", "stop", "mute", "volume_up", "volume_down" }, ["description"] = "Media or volume action to execute." }
                     },
                     ["required"] = new JsonArray { "action" }
                 }
@@ -279,6 +295,12 @@ public static class McpServer
                         bool closed = WindowManager.CloseWindow(target, force);
                         return JsonSerializer.Serialize(new { status = closed ? "ok" : "failed", target });
                     }
+                    if (action == "profile" || action == "workspace")
+                    {
+                        string prof = args["profile"]?.GetValue<string>() ?? args["layout"]?.GetValue<string>() ?? "coding";
+                        bool ok = WindowManager.ApplyWorkspaceProfile(prof);
+                        return JsonSerializer.Serialize(new { status = ok ? "ok" : "failed", profile = prof });
+                    }
                     return JsonSerializer.Serialize(new { status = "error", message = $"Unknown action '{action}'" });
                 }
 
@@ -290,6 +312,17 @@ public static class McpServer
                     {
                         var displays = DesktopManager.GetDisplays();
                         return JsonSerializer.Serialize(new { status = "ok", count = displays.Count, displays });
+                    }
+                    if (action == "list_desktops")
+                    {
+                        var desktops = DesktopManager.ListVirtualDesktops();
+                        return JsonSerializer.Serialize(new { status = "ok", count = desktops.Count, desktops });
+                    }
+                    if (action == "goto" || action == "to")
+                    {
+                        string target = args["target"]?.GetValue<string>() ?? "";
+                        bool ok = DesktopManager.GotoVirtualDesktop(target);
+                        return JsonSerializer.Serialize(new { status = ok ? "ok" : "failed", target });
                     }
                     if (action == "move_to_monitor")
                     {
@@ -380,6 +413,19 @@ public static class McpServer
                         return JsonSerializer.Serialize(new { status = sent ? "ok" : "failed", keys });
                     }
                     return JsonSerializer.Serialize(new { status = "error", message = $"Unknown action '{action}'" });
+                }
+
+                case "win_chauffeur_media":
+                case "chauffeur_media":
+                {
+                    string action = args["action"]?.GetValue<string>() ?? "status";
+                    if (action == "status")
+                    {
+                        var media = MediaController.GetStatus();
+                        return JsonSerializer.Serialize(new { status = "ok", count = media.Count, media });
+                    }
+                    bool ok = MediaController.Control(action);
+                    return JsonSerializer.Serialize(new { status = ok ? "ok" : "failed", action });
                 }
 
                 default:

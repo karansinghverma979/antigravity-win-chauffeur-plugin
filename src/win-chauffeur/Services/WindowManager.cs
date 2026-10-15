@@ -40,7 +40,11 @@ public static class WindowManager
                 }
                 catch { }
 
-                Win32.GetWindowRect(hWnd, out Win32.RECT rect);
+                Win32.RECT rect;
+                if (Win32.DwmGetWindowAttribute(hWnd, Win32.DWMWA_EXTENDED_FRAME_BOUNDS, out rect, Marshal.SizeOf<Win32.RECT>()) != 0)
+                {
+                    Win32.GetWindowRect(hWnd, out rect);
+                }
                 list.Add(new WindowInfo(hWnd, title, procName, (int)pid, rect));
                 return true;
             }, IntPtr.Zero);
@@ -221,5 +225,76 @@ public static class WindowManager
         {
             return Win32.PostMessage(win.Hwnd, Win32.WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
         });
+    }
+
+    public static bool ApplyWorkspaceProfile(string profile)
+    {
+        string p = profile.ToLowerInvariant().Trim();
+        switch (p)
+        {
+            case "coding":
+            {
+                var term = FindWindow("terminal") ?? FindWindow("cmd") ?? FindWindow("powershell");
+                var browser = FindWindow("msedge") ?? FindWindow("chrome") ?? FindWindow("brave");
+                var editor = FindWindow("obsidian") ?? FindWindow("code") ?? FindWindow("notepad");
+
+                if (term != null) TileWindow(term.Title, "left_half");
+                if (browser != null) TileWindow(browser.Title, "top_right");
+                if (editor != null) TileWindow(editor.Title, "bottom_right");
+                return true;
+            }
+
+            case "research":
+            {
+                var browser = FindWindow("msedge") ?? FindWindow("chrome") ?? FindWindow("brave");
+                var notes = FindWindow("obsidian") ?? FindWindow("notepad") ?? FindWindow("terminal");
+
+                if (browser != null) TileWindow(browser.Title, "left_half");
+                if (notes != null) TileWindow(notes.Title, "right_half");
+                return true;
+            }
+
+            case "focus":
+            {
+                IntPtr fg = Win32.GetForegroundWindow();
+                if (fg != IntPtr.Zero)
+                {
+                    var win = FindWindow($"0x{fg.ToInt64():X}");
+                    if (win != null)
+                    {
+                        TileWindow(win.Title, "center");
+                        return true;
+                    }
+                }
+                var topWin = ListWindows(true).Find(w => w.Bounds.Width > 200 && w.Bounds.Height > 200);
+                if (topWin != null)
+                {
+                    TileWindow(topWin.Title, "center");
+                    return true;
+                }
+                return false;
+            }
+
+            case "split":
+            case "dual":
+            {
+                var wins = ListWindows(true).FindAll(w => w.Bounds.Width > 200 && w.Bounds.Height > 200);
+                if (wins.Count >= 2)
+                {
+                    TileWindow(wins[0].Title, "left_half");
+                    TileWindow(wins[1].Title, "right_half");
+                    return true;
+                }
+                else if (wins.Count == 1)
+                {
+                    TileWindow(wins[0].Title, "maximize");
+                    return true;
+                }
+                return false;
+            }
+
+            default:
+                return false;
+        }
     }
 }

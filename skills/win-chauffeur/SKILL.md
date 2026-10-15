@@ -12,12 +12,13 @@ Win-Chauffeur provides Antigravity with full visual perception and physical cont
 ## 🚀 1. When to Activate This Skill
 
 Activate **`win-chauffeur`** whenever the user asks to:
-1. **Take Screenshots or "See" the Screen**: Capture full desktop, active window, or specific screen coordinates.
+1. **Take Screenshots or "See" the Screen**: Capture full desktop, active window, or specific screen coordinates without shadow padding.
 2. **Manage Windows**: Minimize, maximize, tile, snap, resize, hide, bring to front, or move windows across monitors.
-3. **Orchestrate Desktops & Displays**: Switch virtual desktops, query multi-monitor bounds/DPI, or teleport windows between virtual desktops.
-4. **Control the Browser**: Check open tabs, close specific tabs, pause/play web media (YouTube), or navigate URLs.
-5. **Open Files / Visual Media**: Open photos, PDFs, markdown previews, music tracks, or videos on the user's monitor via the Explorer COM bridge.
-6. **Eradicate Ghost Processes**: Hunt down and kill suspended background GUI processes (`Photos.exe`, `rundll32`, orphaned WebView2 instances).
+3. **Stage Workspaces**: 1-click apply developer profiles (`coding`, `research`, `focus`, `split`).
+4. **Orchestrate Desktops & Displays**: Switch virtual desktops, teleport directly to named virtual desktops (`goto "Obsidian"`), or query multi-monitor bounds/DPI.
+5. **Control Browser & Media**: Check open tabs, close specific tabs, pause/play web media, query media status, or adjust volume.
+6. **Open Files / Visual Media**: Open photos, PDFs, markdown previews, music tracks, or videos on the user's monitor via the Explorer COM bridge.
+7. **Eradicate Ghost Processes**: Hunt down and kill suspended background GUI processes (`Photos.exe`, `rundll32`, orphaned WebView2 instances).
 
 ---
 

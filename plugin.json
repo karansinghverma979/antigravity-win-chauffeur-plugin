@@ -1,7 +1,7 @@
 {
   "name": "win-chauffeur-plugin",
   "description": "Windows 11 Autonomous Desktop Chauffeur, Window Manager & Real-Time Computer-Use Sentinel. Manages multi-display setups, virtual desktops, window tiling/focus, ultra-fast screen perception, browser automation, and sovereign desktop dispatch.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Karan Singh Verma",
   "license": "MIT",
   "homepage": "https://github.com/karansinghverma979/antigravity-win-chauffeur-plugin",

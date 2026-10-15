@@ -138,7 +138,21 @@ public class Program
                         {
                             Console.WriteLine($"  Display {d.Index}: {d.Width}x{d.Height} at ({d.X}, {d.Y}) {(d.IsPrimary ? "[PRIMARY]" : "")}");
                         }
+
+                        var vDesktops = DesktopManager.ListVirtualDesktops();
+                        Console.WriteLine($"\nFound {vDesktops.Count} virtual desktops:");
+                        foreach (var vd in vDesktops)
+                        {
+                            Console.WriteLine($"  [{vd.Index}] {vd.Name,-15} {(vd.IsCurrent ? "[ACTIVE]" : "")}");
+                        }
                         return 0;
+                    }
+                    if (args[1] == "goto" || args[1] == "to")
+                    {
+                        if (args.Length < 3) { Console.Error.WriteLine("Usage: win-chauffeur desktop goto <name-or-index>"); return 1; }
+                        bool ok = DesktopManager.GotoVirtualDesktop(args[2]);
+                        Console.WriteLine(ok ? $"Teleported to virtual desktop '{args[2]}'" : $"Failed to teleport to '{args[2]}'");
+                        return ok ? 0 : 1;
                     }
                     if (args[1] == "new" || args[1] == "create")
                     {
@@ -154,6 +168,35 @@ public class Program
                         return ok ? 0 : 1;
                     }
                     break;
+                }
+
+                case "layout":
+                case "workspace":
+                {
+                    if (args.Length < 2) { Console.Error.WriteLine("Usage: win-chauffeur layout <coding|research|focus|split>"); return 1; }
+                    string profile = args[1];
+                    if (profile == "apply" && args.Length > 2) profile = args[2];
+                    bool ok = WindowManager.ApplyWorkspaceProfile(profile);
+                    Console.WriteLine(ok ? $"Applied workspace profile '{profile}'" : $"Failed to apply profile '{profile}'");
+                    return ok ? 0 : 1;
+                }
+
+                case "media":
+                {
+                    string sub = args.Length > 1 ? args[1].ToLowerInvariant() : "status";
+                    if (sub == "status" || sub == "list")
+                    {
+                        var media = MediaController.GetStatus();
+                        Console.WriteLine($"Active media streams ({media.Count}):");
+                        foreach (var m in media)
+                        {
+                            Console.WriteLine($"  [{m.App}] {m.Title}");
+                        }
+                        return 0;
+                    }
+                    bool ok = MediaController.Control(sub);
+                    Console.WriteLine(ok ? $"Media action '{sub}' dispatched" : $"Failed to dispatch media action '{sub}'");
+                    return ok ? 0 : 1;
                 }
 
                 case "click":
@@ -184,7 +227,7 @@ public class Program
     private static void PrintUsage()
     {
         Console.WriteLine(@"
-Win-Chauffeur v1.0.0 — Autonomous Windows 11 Desktop Operator
+Win-Chauffeur v1.1.0 — Autonomous Windows 11 Desktop Operator
 
 USAGE:
   win-chauffeur --mcp                        Start in MCP stdio daemon mode
@@ -193,11 +236,13 @@ USAGE:
   win-chauffeur window tile <target> <layout> Snap window (left_half, right_half, center, max...)
   win-chauffeur window focus <target>        Bring window to foreground
   win-chauffeur window close <target>        Close window gracefully
+  win-chauffeur layout <coding|research|focus|split> Apply 1-click workspace profile
   win-chauffeur open <path-or-url>           Launch file/media via Explorer COM bridge
   win-chauffeur browser tabs                 List open browser tabs
   win-chauffeur browser close-tab <match>    Close specific tab in Edge/Chrome
-  win-chauffeur browser media-toggle         Toggle Play/Pause on media/YouTube
-  win-chauffeur desktop list                 List active physical monitors
+  win-chauffeur media [status|play|pause|next|prev|mute|volup|voldown] Control media playback & volume
+  win-chauffeur desktop list                 List active physical monitors & virtual desktops
+  win-chauffeur desktop goto <name-or-idx>   Teleport to named virtual desktop (e.g. 'Obsidian')
   win-chauffeur click <x> <y> [left|right]   Click coordinates on display
 ");
     }
